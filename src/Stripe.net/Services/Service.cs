@@ -2,6 +2,7 @@ namespace Stripe
 {
     using System.Collections.Generic;
     using System.Net;
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -20,6 +21,8 @@ namespace Stripe
         }
 
         public string ApiKey { get; set; }
+
+        public HttpClient HttpClient { get; set; }
 
         public abstract string BasePath { get; }
 
@@ -83,7 +86,8 @@ namespace Stripe
             return Mapper<T>.MapFromJson(
                 Requestor.Delete(
                     this.ApplyAllParameters(options, url),
-                    this.SetupRequestOptions(requestOptions)));
+                    this.SetupRequestOptions(requestOptions),
+                    this.HttpClient));
         }
 
         protected async Task<T> DeleteRequestAsync<T>(string url, BaseOptions options, RequestOptions requestOptions, CancellationToken cancellationToken)
@@ -92,7 +96,8 @@ namespace Stripe
                 await Requestor.DeleteAsync(
                     this.ApplyAllParameters(options, url),
                     this.SetupRequestOptions(requestOptions),
-                    cancellationToken).ConfigureAwait(false));
+                    cancellationToken,
+                    this.HttpClient).ConfigureAwait(false));
         }
 
         protected T GetRequest<T>(string url, BaseOptions options, RequestOptions requestOptions, bool isListMethod)
@@ -100,7 +105,8 @@ namespace Stripe
             return Mapper<T>.MapFromJson(
                 Requestor.GetString(
                     this.ApplyAllParameters(options, url, isListMethod),
-                    this.SetupRequestOptions(requestOptions)));
+                    this.SetupRequestOptions(requestOptions),
+                    this.HttpClient));
         }
 
         protected async Task<T> GetRequestAsync<T>(string url, BaseOptions options, RequestOptions requestOptions, bool isListMethod, CancellationToken cancellationToken)
@@ -109,7 +115,8 @@ namespace Stripe
                 await Requestor.GetStringAsync(
                     this.ApplyAllParameters(options, url, isListMethod),
                     this.SetupRequestOptions(requestOptions),
-                    cancellationToken).ConfigureAwait(false));
+                    cancellationToken,
+                    this.HttpClient).ConfigureAwait(false));
         }
 
         protected IEnumerable<T> ListRequestAutoPaging<T>(string url, ListOptions options, RequestOptions requestOptions)
@@ -140,7 +147,8 @@ namespace Stripe
             return Mapper<T>.MapFromJson(
                 Requestor.PostString(
                     this.ApplyAllParameters(options, url),
-                    this.SetupRequestOptions(requestOptions)));
+                    this.SetupRequestOptions(requestOptions),
+                    this.HttpClient));
         }
 
         protected async Task<T> PostRequestAsync<T>(string url, BaseOptions options, RequestOptions requestOptions, CancellationToken cancellationToken)
@@ -149,7 +157,8 @@ namespace Stripe
                 await Requestor.PostStringAsync(
                     this.ApplyAllParameters(options, url),
                     this.SetupRequestOptions(requestOptions),
-                    cancellationToken).ConfigureAwait(false));
+                    cancellationToken,
+                    this.HttpClient).ConfigureAwait(false));
         }
 
         protected RequestOptions SetupRequestOptions(RequestOptions requestOptions)
