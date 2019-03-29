@@ -28,39 +28,39 @@ namespace Stripe.Infrastructure
 
         internal static HttpClient HttpClient { get; private set; }
 
-        public static StripeResponse GetString(string url, RequestOptions requestOptions)
+        public static StripeResponse GetString(string url, RequestOptions requestOptions, HttpClient client = null)
         {
             var wr = GetRequestMessage(url, HttpMethod.Get, requestOptions);
 
-            return ExecuteRequest(wr);
+            return ExecuteRequest(wr, client: client);
         }
 
-        public static StripeResponse PostString(string url, RequestOptions requestOptions)
+        public static StripeResponse PostString(string url, RequestOptions requestOptions, HttpClient client = null)
         {
             var wr = GetRequestMessage(url, HttpMethod.Post, requestOptions);
 
-            return ExecuteRequest(wr);
+            return ExecuteRequest(wr, client: client);
         }
 
-        public static StripeResponse Delete(string url, RequestOptions requestOptions)
+        public static StripeResponse Delete(string url, RequestOptions requestOptions, HttpClient client = null)
         {
             var wr = GetRequestMessage(url, HttpMethod.Delete, requestOptions);
 
-            return ExecuteRequest(wr);
+            return ExecuteRequest(wr, client: client);
         }
 
-        public static StripeResponse PostFile(string url, Stream stream, string purpose, RequestOptions requestOptions)
+        public static StripeResponse PostFile(string url, Stream stream, string purpose, RequestOptions requestOptions, HttpClient client = null)
         {
             var wr = GetRequestMessage(url, HttpMethod.Post, requestOptions);
 
             ApplyMultiPartFileToRequest(wr, stream, purpose);
 
-            return ExecuteRequest(wr);
+            return ExecuteRequest(wr, client: client);
         }
 
-        private static StripeResponse ExecuteRequest(HttpRequestMessage requestMessage)
+        private static StripeResponse ExecuteRequest(HttpRequestMessage requestMessage, HttpClient client = null)
         {
-            var response = HttpClient.SendAsync(requestMessage).ConfigureAwait(false).GetAwaiter().GetResult();
+            var response = (client ?? HttpClient).SendAsync(requestMessage).ConfigureAwait(false).GetAwaiter().GetResult();
             var responseText = response.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
 
             var result = BuildResponseData(response, responseText);
@@ -73,39 +73,39 @@ namespace Stripe.Infrastructure
             throw BuildStripeException(result, response.StatusCode, requestMessage.RequestUri.AbsoluteUri, responseText);
         }
 
-        public static Task<StripeResponse> GetStringAsync(string url, RequestOptions requestOptions, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<StripeResponse> GetStringAsync(string url, RequestOptions requestOptions, CancellationToken cancellationToken = default(CancellationToken), HttpClient client = null)
         {
             var wr = GetRequestMessage(url, HttpMethod.Get, requestOptions);
 
-            return ExecuteRequestAsync(wr, cancellationToken);
+            return ExecuteRequestAsync(wr, cancellationToken, client);
         }
 
-        public static Task<StripeResponse> PostStringAsync(string url, RequestOptions requestOptions, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<StripeResponse> PostStringAsync(string url, RequestOptions requestOptions, CancellationToken cancellationToken = default(CancellationToken), HttpClient client = null)
         {
             var wr = GetRequestMessage(url, HttpMethod.Post, requestOptions);
 
-            return ExecuteRequestAsync(wr, cancellationToken);
+            return ExecuteRequestAsync(wr, cancellationToken, client);
         }
 
-        public static Task<StripeResponse> DeleteAsync(string url, RequestOptions requestOptions, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<StripeResponse> DeleteAsync(string url, RequestOptions requestOptions, CancellationToken cancellationToken = default(CancellationToken), HttpClient client = null)
         {
             var wr = GetRequestMessage(url, HttpMethod.Delete, requestOptions);
 
-            return ExecuteRequestAsync(wr, cancellationToken);
+            return ExecuteRequestAsync(wr, cancellationToken, client);
         }
 
-        public static Task<StripeResponse> PostFileAsync(string url, Stream stream, string purpose, RequestOptions requestOptions, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<StripeResponse> PostFileAsync(string url, Stream stream, string purpose, RequestOptions requestOptions, CancellationToken cancellationToken = default(CancellationToken), HttpClient client = null)
         {
             var wr = GetRequestMessage(url, HttpMethod.Post, requestOptions);
 
             ApplyMultiPartFileToRequest(wr, stream, purpose);
 
-            return ExecuteRequestAsync(wr, cancellationToken);
+            return ExecuteRequestAsync(wr, cancellationToken, client);
         }
 
-        private static async Task<StripeResponse> ExecuteRequestAsync(HttpRequestMessage requestMessage, CancellationToken cancellationToken = default(CancellationToken))
+        private static async Task<StripeResponse> ExecuteRequestAsync(HttpRequestMessage requestMessage, CancellationToken cancellationToken = default(CancellationToken), HttpClient client = null)
         {
-            var response = await HttpClient.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+            var response = await (client ?? HttpClient).SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
             var responseText = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
             var result = BuildResponseData(response, responseText);
